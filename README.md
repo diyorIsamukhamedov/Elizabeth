@@ -7,7 +7,7 @@ An adaptive cognitive AI system designed to model individual reasoning patterns,
 ## 📁 Project Structure
 
 ```
-Elizabeth/
+Elizabeth/src
 │
 ├── 1_memory/
 │   ├── conversation_logger.py         # Captures and stores interaction history

@@ -1,7 +1,7 @@
 # Ignore hidden and actual virtual environment directories
 venv/
 .venv/
-christian/
+elizabeth/
 
 # vscode trash
 .vscode

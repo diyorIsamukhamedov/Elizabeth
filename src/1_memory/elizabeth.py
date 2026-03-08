@@ -39,3 +39,50 @@ def init_db():
 
     conn.commit()
     conn.close()
+
+def save_message(role: str, content: str):
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "INSERT INTO messages (role, content, timestamp) VALUES (?, ?, ?)",
+        (role, content, datetime.now().isoformat())
+    )
+
+    conn.commit()
+    conn.close()
+
+def load_history() -> list[dict]:
+    conn = sqlite3.connect(DB_PATH)
+    rows = conn.execute(
+        "SELECT role, content FROM messages ORDER BY id"
+    ).fetchall()
+    conn.close()
+    return [{"role": row[0], "content": row[1]} for row in rows]
+
+def get_stats() -> dict:
+    conn = sqlite3.connect(DB_PATH)
+    total      = conn.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
+    user_count = conn.execute("SELECT COUNT(*) FROM messages WHERE role='user'").fetchone()[0]
+    first_date = conn.execute("SELECT timestamp FROM messages ORDER BY id LIMIT 1").fetchone()
+    conn.close()
+    return {
+        "total_messages" : total,
+        "interactions"   : user_count,
+        "since"          : first_date[0][:10] if first_date else "today"
+    }
+# ---------------------- DI ---------------------- DI ---------------------- DI ---------------------- DI ----------------------
+
+# ---------------------- DI ---------------------- DI ---------------------- DI ---------------------- DI ----------------------
+#LLM
+def get_response(history: list[dict]) -> str:
+    response = client.messages.create(
+        model      = MODEL,
+        max_tokens = 1024,
+        system     = SYSTEM_PROMPT,
+        messages   = history
+    )
+
+    return response.content[0].text
+# ---------------------- DI ---------------------- DI ---------------------- DI ---------------------- DI ----------------------
+
+# ---------------------- DI ---------------------- DI ---------------------- DI ---------------------- DI ----------------------
+#CLI

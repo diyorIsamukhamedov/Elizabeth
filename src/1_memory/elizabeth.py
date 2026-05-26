@@ -86,3 +86,59 @@ def get_response(history: list[dict]) -> str:
 
 # ---------------------- DI ---------------------- DI ---------------------- DI ---------------------- DI ----------------------
 #CLI
+def print_banner():
+    stats = get_stats()
+    print("\n" + "─" * 55)
+    print("  🧠  E L I Z A B E T H")
+    print("  Adaptive Personal Intelligence System")
+    print("─" * 55)
+    if stats["total_messages"] > 0:
+        print(f"  Memory: {stats['interactions']} interactions since {stats['since']}")
+    else:
+        print("  Memory: fresh start — no history yet")
+    print("─" * 55)
+    print("  Commands:  'quit' to exit  |  'clear' to reset memory")
+    print("─" * 55 + "\n")
+ 
+def clear_memory():
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("DELETE FROM messages")
+    conn.commit()
+    conn.close()
+    print("\n  Memory cleared.\n")
+# ---------------------- DI ---------------------- DI ---------------------- DI ---------------------- DI ----------------------
+def main():
+    init_db()
+    print_banner()
+ 
+    while True:
+        try:
+            user_input = input("You: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n\n  Goodbye.\n")
+            break
+ 
+        if not user_input:
+            continue
+ 
+        if user_input.lower() == "quit":
+            print("\n  Goodbye.\n")
+            break
+ 
+        if user_input.lower() == "clear":
+            clear_memory()
+            continue
+ 
+        # Save user message
+        save_message("user", user_input)
+ 
+        # Load full history and get response
+        history  = load_history()
+        response = get_response(history)
+ 
+        # Save and display response
+        save_message("assistant", response)
+        print(f"\nElizabeth: {response}\n")
+ 
+if __name__ == "__main__":
+    main()
